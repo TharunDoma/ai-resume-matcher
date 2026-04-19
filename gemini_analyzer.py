@@ -33,7 +33,9 @@ def load_gemini_client() -> genai.Client:
     # First: try Streamlit secrets (used when deployed on Streamlit Cloud)
     try:
         import streamlit as st
-        api_key = st.secrets.get("GEMINI_API_KEY")
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except KeyError:
+        pass  # Key not in Streamlit secrets — fall through to .env
     except Exception:
         pass  # Not running in Streamlit context — fall through to .env
 
