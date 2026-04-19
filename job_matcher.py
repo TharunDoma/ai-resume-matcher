@@ -22,9 +22,21 @@ from google import genai
 
 
 def load_gemini_client() -> genai.Client:
-    """Load API key from .env and return a ready-to-use Gemini client."""
-    load_dotenv()
-    api_key = os.getenv("GEMINI_API_KEY")
+    """
+    Load API key from Streamlit secrets (cloud) or .env (local).
+    Same dual-environment pattern as gemini_analyzer.py.
+    """
+    api_key = None
+
+    try:
+        import streamlit as st
+        api_key = st.secrets.get("GEMINI_API_KEY")
+    except Exception:
+        pass
+
+    if not api_key:
+        load_dotenv()
+        api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key or api_key == "PASTE_YOUR_REAL_KEY_HERE":
         raise ValueError("GEMINI_API_KEY is missing or still a placeholder in .env")

@@ -21,11 +21,26 @@ from google import genai
 
 def load_gemini_client() -> genai.Client:
     """
-    Load API key from .env and return a ready-to-use Gemini client.
-    Reusing the same secure pattern from Step 1.
+    Load API key from Streamlit secrets (cloud) or .env (local).
+
+    DE Analogy: In production pipelines, credentials are injected at runtime
+    from a secrets manager (AWS Secrets Manager, GCP Secret Manager).
+    Here we check Streamlit's secrets first, then fall back to .env for
+    local development — same pattern, different environment.
     """
-    load_dotenv()
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = None
+
+    # First: try Streamlit secrets (used when deployed on Streamlit Cloud)
+    try:
+        import streamlit as st
+        api_key = st.secrets.get("GEMINI_API_KEY")
+    except Exception:
+        pass  # Not running in Streamlit context — fall through to .env
+
+    # Second: fall back to .env file (used for local development)
+    if not api_key:
+        load_dotenv()
+        api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key or api_key == "PASTE_YOUR_REAL_KEY_HERE":
         raise ValueError("GEMINI_API_KEY is missing or still a placeholder in .env")
