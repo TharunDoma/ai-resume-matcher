@@ -30,7 +30,9 @@ def load_gemini_client() -> genai.Client:
 
     try:
         import streamlit as st
-        api_key = st.secrets.get("GEMINI_API_KEY")
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except KeyError:
+        pass
     except Exception:
         pass
 
